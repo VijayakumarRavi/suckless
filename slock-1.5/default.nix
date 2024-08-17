@@ -12,8 +12,6 @@ with pkgs.lib;
 
     src = ./.;
 
-    nativeBuildInputs = [pkgs.pkg-config pkgs.libX11 pkgs.libXrandr];
-
     patches = [
       ./patches/slock-dwmlogoandblurscreen-1.0.diff
       ./patches/slock-xresources-20191126-53e56c7.diff
