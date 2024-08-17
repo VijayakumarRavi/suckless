@@ -8,7 +8,7 @@
     self,
     nixpkgs,
   }: let
-    supportedSystems = ["x86_64-linux" "aarch64-linux"];
+    supportedSystems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
   in {
     # Enables `nix fmt` at root of repo to format all nix files
