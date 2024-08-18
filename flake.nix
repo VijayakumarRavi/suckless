@@ -3,10 +3,12 @@
   nixConfig = {
     substituters = [
       "https://vijay.cachix.org?priority=1"
+      "https://cache.nixos.org?priority=2"
     ];
 
     trusted-public-keys = [
       "vijay.cachix.org-1:6Re6EF3Q58sxaIobAWP1QTwMUCSA0nYMrSJGUedL3Zk="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
   };
 
