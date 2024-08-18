@@ -1,5 +1,14 @@
 {
   description = "Suckless builds";
+  nixConfig = {
+    substituters = [
+      "https://vijay.cachix.org?priority=1"
+    ];
+
+    trusted-public-keys = [
+      "vijay.cachix.org-1:6Re6EF3Q58sxaIobAWP1QTwMUCSA0nYMrSJGUedL3Zk="
+    ];
+  };
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";

@@ -1,0 +1,87 @@
+name: 🏗️ Build and update cachix
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch: null
+  push:
+  schedule:
+    - cron: 0 4 * * *
+
+jobs:
+  Build:
+    name: Buildig 👷‍♂️ New 🆕 Nix ISO 📀
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system: [x86_64-linux, aarch64-linux]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Nix
+        uses: nixbuild/nix-quick-install-action@v28
+        with:
+          nix_conf: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            keep-outputs = true
+            keep-derivations = true
+
+      - name: Get current date
+        id: current_date
+        run: |
+          DATE="$(TZ="Asia/Kolkata" date "+%d.%m.%Y")"
+          echo "DATE=$DATE" >> "$GITHUB_ENV"
+
+      - name: Cache Nix store
+        id: nix-cache
+        uses: nix-community/cache-nix-action@v5
+        with:
+          primary-key: nix-${{ matrix.system }}-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ matrix.system }}- # if there's no cache hit, restore a cache by this prefix 
+          purge: true # purge all versions of the cache
+          purge-prefixes: nix-${{ matrix.system }}-
+          purge-created: 300 # created more than this number of seconds ago relative to the start of the `Post Restore` phase
+          purge-primary-key: never # except the version with the `primary-key`, if it exists
+
+      - name: Cachix binary cache
+        if: steps.nix-cache.outputs.hit-primary-key != 'true'
+        uses: cachix/cachix-action@v15
+        with:
+          name: vijay
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Bump flake.lock
+        run: nix flake update --accept-flake-config
+
+      - name: Build DWM
+        if: steps.nix-cache.outputs.hit-primary-key != 'true'
+        run: nix build --accept-flake-config .#dwm && cachix push vijay ./result
+
+      - name: Build Dmenu
+        if: steps.nix-cache.outputs.hit-primary-key != 'true'
+        run: nix build --accept-flake-config .#dmenu && cachix push vijay ./result
+
+      - name: Build ST
+        if: steps.nix-cache.outputs.hit-primary-key != 'true'
+        run: nix build --accept-flake-config .#st && cachix push vijay ./result
+        
+      - name: Build Slock
+        if: steps.nix-cache.outputs.hit-primary-key != 'true'
+        run: nix build --accept-flake-config .#slock && cachix push vijay ./result
+
+      - name: Commit and Push flake.lock
+        if: matrix.system == 'x86_64-linux'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Bot 🤖(flake): bump flake.lock"
+          commit_user_name: Flake Bot
+          commit_options: --no-verify --signoff
+          commit_author: Flake Bot <github-actions@github.com>
+          branch: master
+          file_pattern: flake.lock
+          skip_dirty_check: false
+          skip_fetch: true
+
