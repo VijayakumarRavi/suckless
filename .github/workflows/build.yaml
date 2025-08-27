@@ -35,7 +35,7 @@ jobs:
 
       - name: Github Nix store cache
         id: nix-cache
-        uses: nix-community/cache-nix-action@v5
+        uses: nix-community/cache-nix-action@v6
         with:
           primary-key: nix-${{ matrix.system }}-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
           restore-prefixes-first-match: nix-${{ matrix.system }}- # if there's no cache hit, restore a cache by this prefix 
