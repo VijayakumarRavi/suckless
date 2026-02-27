@@ -72,7 +72,7 @@ jobs:
 
       - name: Commit and Push flake.lock
         if: matrix.system == 'x86_64-linux'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Bot 🤖(flake): bump flake.lock"
           commit_user_name: Flake Bot
